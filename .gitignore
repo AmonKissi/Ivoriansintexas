@@ -1,0 +1,81 @@
+# ============================
+# Node & Dependencies
+# ============================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# ============================
+# Next.js Build Output
+# ============================
+.next/
+out/
+dist/
+build/
+
+# ============================
+# Production
+# ============================
+*.log
+logs/
+*.tsbuildinfo
+
+# ============================
+# Local Environment Variables
+# ============================
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Never commit API Keys or Secrets
+*.env.*
+
+# ============================
+# OS / System Files
+# ============================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ============================
+# VSCode
+# ============================
+.vscode/
+.history/
+*.code-workspace
+
+# ============================
+# Testing
+# ============================
+coverage/
+jest-cache/
+jest-output/
+
+# ============================
+# Temporary / Cache Files
+# ============================
+.tmp/
+temp/
+cache/
+.eslintcache
+.prettier-cache
+
+# ============================
+# Images / Uploads (optional)
+# ============================
+public/uploads/
+uploads/
+
+# ============================
+# Misc
+# ============================
+*.swp
+*.swo
+*.bak

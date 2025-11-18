@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Ivorian flag colors - Orange, White, Green with Gold accents */
+    --background: 0 0% 100%;
+    --foreground: 25 15% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 25 15% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 15% 15%;
+
+    /* Primary - Ivorian Orange */
+    --primary: 16 100% 60%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Secondary - Ivorian Green */
+    --secondary: 150 100% 35%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Accent - Gold */
+    --accent: 45 90% 55%;
+    --accent-foreground: 25 15% 15%;
+
+    --muted: 40 10% 96%;
+    --muted-foreground: 25 10% 45%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 40 15% 88%;
+    --input: 40 15% 88%;
+    --ring: 16 100% 60%;
+
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(16 100% 60%), hsl(45 90% 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(16 100% 60% / 0.95), hsl(150 100% 35% / 0.95));
+    --gradient-overlay: linear-gradient(180deg, transparent, hsl(25 15% 15% / 0.7));
+    
+    /* Shadows */
+    --shadow-warm: 0 10px 40px -10px hsl(16 100% 60% / 0.3);
+    --shadow-elegant: 0 20px 60px -15px hsl(25 15% 15% / 0.2);
+    
+    /* Animations */
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    --background: 25 20% 8%;
+    --foreground: 40 10% 95%;
+
+    --card: 25 18% 12%;
+    --card-foreground: 40 10% 95%;
+
+    --popover: 25 18% 12%;
+    --popover-foreground: 40 10% 95%;
+
+    --primary: 16 100% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 150 100% 35%;
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 45 90% 55%;
+    --accent-foreground: 25 15% 15%;
+
+    --muted: 25 15% 18%;
+    --muted-foreground: 40 8% 60%;
+
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 25 15% 22%;
+    --input: 25 15% 22%;
+    --ring: 16 100% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

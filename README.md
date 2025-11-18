@@ -1,43 +1,73 @@
-1. About the Organization
-Mission or Purpose:
-The Association des Ivoiriens au Texas (AIT) is all about bringing Ivorians in Texas together as one big family. Our goal is to stay connected, support each other, and celebrate our beautiful Ivorian culture while building a strong community here in the U.S. We help new arrivals settle in, promote education, and make sure our culture shines wherever we go.
-Community Description:
-AIT is a lively mix of Ivorians from all over Texas — students, families, professionals — everyone! We share good vibes, help one another when needed, and create spaces where people feel at home. Whether it’s a party, a community event, or just a moment to talk about home, AIT is where Ivorians come together.
-Tagline or Slogan:
-🇨🇮 “Together we rise — Unity, Culture, and Progress.”
-3. Website Goals
-The AIT website will be our community hub — a place to:
-✅ Share what’s happening in the Ivorian community across Texas
-✅ Post and promote events
-✅ Highlight members and community news
-✅ Welcome new members
-✅ Collect donations and support for our projects
-✅ Show off photos and videos from our amazing gatherings
-Other goal:
-To keep Ivorians everywhere connected and proud of our roots while building bridges with other African communities in Texas.
-5. Content
-Existing Text/Content:
-We already have our mission and values written out, but we’ll also add fun, personal stuff — stories from members, event recaps, shoutouts to volunteers, and maybe even a “Spotlight of the Month.”
-Photos/Videos:
-Yes! We have tons — from cookouts, Independence Day parties, gala nights, to community meetings. The gallery will definitely show the heart of AIT.
-6. Branding & Design
-Colors:
-Let’s stick with our flag colors — orange, white, and green — they represent our pride, peace, and unity. We can mix in gold or brown tones for warmth and that classy Ivorian touch.
-Design Style:
-We want something modern but still full of life — clean layout, bold colors, and lots of pictures of our people and culture. Something that feels homey, positive, and easy to navigate.
-Websites We Like:
-Sites like Nigerians in Diaspora USA or Cameroonians in Houston — community-based and simple but full of energy.
-8. Contact & Social Media
-Public Email Address:
-info@ivoriansintexas.com
-Social Media:
-Facebook: Ivorians in Texas
-Instagram: @ivoriansintexas
-WhatsApp: Group link shared with members
-9. Additional Features
-For the website, we’d love to have:
-✅ Event registration (for parties, meetings, and special events)
-✅ Newsletter sign-up
-✅ Online donations or membership payments
-✅ Member directory (for registered members only)
-✅ Blog or News section to keep everyone updated
+# Welcome to your Lovable project
+
+## Project info
+
+**URL**: https://lovable.dev/projects/529ccf21-28f0-4631-9a40-55bd8adb0416
+
+## How can I edit this code?
+
+There are several ways of editing your application.
+
+**Use Lovable**
+
+Simply visit the [Lovable Project](https://lovable.dev/projects/529ccf21-28f0-4631-9a40-55bd8adb0416) and start prompting.
+
+Changes made via Lovable will be committed automatically to this repo.
+
+**Use your preferred IDE**
+
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+Follow these steps:
+
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
+
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
+npm run dev
+```
+
+**Edit a file directly in GitHub**
+
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
+
+**Use GitHub Codespaces**
+
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
+
+## What technologies are used for this project?
+
+This project is built with:
+
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/529ccf21-28f0-4631-9a40-55bd8adb0416) and click on Share -> Publish.
+
+## Can I connect a custom domain to my Lovable project?
+
+Yes, you can!
+
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
