@@ -47,9 +47,11 @@ const Header = () => {
 
           {/* CTA Button */}
           <div className="hidden md:block">
+            <a href="/signup">
             <Button className="bg-gradient-primary hover:opacity-90 transition-opacity">
               Join Us
             </Button>
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
@@ -77,9 +79,11 @@ const Header = () => {
                   {link.label}
                 </NavLink>
               ))}
+              <a  href="/signup">
               <Button className="bg-gradient-primary hover:opacity-90 transition-opacity w-full">
                 Join Us
               </Button>
+              </a>
             </div>
           </nav>
         )}
