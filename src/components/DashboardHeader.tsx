@@ -14,6 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getRoleName, getRoleColor } from '@/hooks/useUserRole';
 import { useSocial } from "@/hooks/useSocial";
+import defaultProfile from "@/assets/default.png";
+
 
 const DashboardHeader = () => {
   const { user, logout } = useAuth();
@@ -145,23 +147,40 @@ const DashboardHeader = () => {
                     ) : (
                       searchResults.map((res) => (
                         <div key={res._id} className="flex items-center justify-between p-2 hover:bg-muted rounded-xl transition-colors group">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full overflow-hidden bg-primary/10 border border-border">
-                              {res.profileImage ? (
-                                <img src={res.profileImage} className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-[10px] font-bold">{res.firstName?.[0]}</div>
-                              )}
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-xs font-bold leading-none">{res.firstName} {res.lastName}</span>
-                              <span className="text-[10px] text-muted-foreground">{res.city || "Texas"}</span>
-                            </div>
-                          </div>
-                          <Button size="sm" variant="ghost" onClick={() => sendRequest(res._id)} className="h-8 w-8 p-0 rounded-full hover:bg-primary/10 text-primary">
-                            <UserPlus size={14} />
-                          </Button>
-                        </div>
+  <div className="flex items-center gap-3">
+    <div className="w-8 h-8 rounded-full overflow-hidden bg-primary/10 border border-border flex items-center justify-center">
+      {res.profileImage && res.profileImage.trim() !== "" ? (
+        <img 
+          src={res.profileImage} 
+          className="w-full h-full object-cover" 
+          alt={`${res.firstName}'s profile`}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = defaultProfile;
+          }}
+        />
+      ) : (
+        /* Fallback to your default asset */
+        <img 
+          src={defaultProfile} 
+          className="w-full h-full object-cover opacity-80" 
+          alt="Default Profile" 
+        />
+      )}
+    </div>
+    <div className="flex flex-col">
+      <span className="text-xs font-bold leading-none">{res.firstName} {res.lastName}</span>
+      <span className="text-[10px] text-muted-foreground">{res.city || "Texas"}</span>
+    </div>
+  </div>
+  <Button 
+    size="sm" 
+    variant="ghost" 
+    onClick={() => sendRequest(res._id)} 
+    className="h-8 w-8 p-0 rounded-full hover:bg-primary/10 text-primary"
+  >
+    <UserPlus size={14} />
+  </Button>
+</div>
                       ))
                     )}
                   </div>

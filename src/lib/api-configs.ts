@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 // 1. Define the Base URL
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 // 2. Map all endpoints to maintain consistency across the app
 export const ENDPOINTS = {

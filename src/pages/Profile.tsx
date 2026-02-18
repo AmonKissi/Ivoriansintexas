@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import API, { ENDPOINTS } from "@/lib/api-configs";
 import { useToast } from "@/hooks/use-toast";
+import defaultProfile from "@/assets/default.png";
 
 const Profile = () => {
   const { logout } = useAuth();
@@ -232,19 +233,34 @@ const Profile = () => {
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-white to-green-600" />
               <div className="flex flex-col md:flex-row items-center gap-8">
                 <div className="relative group">
-                  <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center border-4 border-card shadow-lg overflow-hidden transition-transform group-hover:scale-105">
-                    {profile?.profileImage ? (
-                      <img src={profile.profileImage} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-                      <User size={48} className="text-muted-foreground" />
-                    )}
-                    {isUploading && (
-                      <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white">
-                        <Loader2 className="animate-spin mb-1" size={20} />
-                        <span className="text-[10px] font-bold uppercase">Saving</span>
-                      </div>
-                    )}
-                  </div>
+                  <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center border-4 border-card shadow-lg overflow-hidden transition-transform group-hover:scale-105 relative">
+  {profile?.profileImage && profile.profileImage.trim() !== "" ? (
+    <img 
+      src={profile.profileImage} 
+      alt="Profile" 
+      className="w-full h-full object-cover" 
+      onError={(e) => {
+        // Fallback if the saved URL is broken
+        (e.currentTarget as HTMLImageElement).src = defaultProfile;
+      }}
+    />
+  ) : (
+    /* Using your default.png asset instead of the Lucide User icon */
+    <img 
+      src={defaultProfile} 
+      alt="Default Profile" 
+      className="w-full h-full object-cover" 
+    />
+  )}
+
+  {/* Keep your loading overlay exactly as it was */}
+  {isUploading && (
+    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white">
+      <Loader2 className="animate-spin mb-1" size={20} />
+      <span className="text-[10px] font-bold uppercase">Saving</span>
+    </div>
+  )}
+</div>
                   <button onClick={() => fileInputRef.current?.click()} className="absolute bottom-1 right-1 bg-primary text-white p-2 rounded-full shadow-lg hover:bg-primary/90 transition-all z-10">
                     <Camera size={16} />
                   </button>
