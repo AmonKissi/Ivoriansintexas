@@ -1,3 +1,5 @@
+// src/pages/SignUp.tsx
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom"; // Added Link to imports
 import Header from "@/components/Header";

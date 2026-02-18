@@ -11,41 +11,52 @@ export const ENDPOINTS = {
     LOGIN: '/auth/login',
     SIGNUP: '/auth/signup',
     ME: '/auth/me',
+    RESEND_VERIFICATION: '/auth/resend-verification',
   },
   USERS: {
+    BASE: '/users',                        // Added for general user routes
     PROFILE: '/users/profile',
-    PASSWORD: '/users/profile/password',      // UPDATED
-    DEACTIVATE: '/users/profile/deactivate',  // UPDATED
-    SEARCH: '/users/search',
-    REQUEST: '/users/request',                // Usage: `${ENDPOINTS.USERS.REQUEST}/${targetId}`
-    ACCEPT: '/users/accept',                  // Usage: `${ENDPOINTS.USERS.ACCEPT}/${requesterId}`
-    NOTIFICATIONS: '/users/notifications/read',
+    PASSWORD: '/users/profile/password',   // Matched to your updated controller
+    DEACTIVATE: '/users/profile/deactivate',
     UPLOAD_PICTURE: '/users/profile-picture',
+    SEARCH: '/users/search',
+    REQUEST: '/users/request',
+    ACCEPT: '/users/accept',
+    NOTIFICATIONS: '/users/notifications/read',
   },
   POSTS: {
+    BASE: '/posts',                        // Added for general post routes
     FEED: '/posts',
     CREATE: '/posts',
     LIKE: (postId: string) => `/posts/${postId}/like`,
+    COMMENT: (postId: string) => `/posts/${postId}/comment`,
   },
   EVENTS: {
     BASE: '/events',
+    SEARCH: '/events/search',              // Added for event search logic
+    RSVP: (id: string) => `/events/${id}/rsvp`, // Added functional RSVP
   }
 };
 
 // 3. Create the Axios Instance
 const API = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
-// 4. Middleware: Attach JWT Token to every request automatically
+// 4. Middleware: Attach JWT Token and Handle Content-Type
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem('token');
+  
   if (token) {
     req.headers.Authorization = `Bearer ${token}`;
   }
+
+  // Axios handles multipart/form-data boundaries automatically when sending FormData
+  // It's often safer to let Axios set the Content-Type for FormData
+  if (!(req.data instanceof FormData)) {
+    req.headers['Content-Type'] = 'application/json';
+  }
+
   return req;
 });
 
@@ -54,10 +65,15 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Clear token if unauthorized (token expired or invalid)
       localStorage.removeItem('token');
-      // Redirecting here is optional; usually handled by your AuthContext
+      localStorage.removeItem('user');
+      // Optional: window.location.href = '/login';
     }
+    
+    if (import.meta.env.DEV) {
+      console.error(`[API Error] ${error.response?.status}:`, error.response?.data || error.message);
+    }
+
     return Promise.reject(error);
   }
 );

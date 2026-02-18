@@ -19,6 +19,7 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard"; 
 import Profile from "./pages/Profile";     
+import VerifyEmail from "./pages/VerifyEmail";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/news" element={<News />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
 
             {/* Protected Member Routes */}
             <Route 
