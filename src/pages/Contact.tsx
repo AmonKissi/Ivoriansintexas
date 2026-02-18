@@ -18,6 +18,7 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // In a real scenario, you'd send this to your Node.js backend
     toast.success("Thank you for your message! We'll get back to you soon.");
     setFormData({ name: "", email: "", subject: "", message: "" });
   };
@@ -152,7 +153,7 @@ const Contact = () => {
                       className="text-muted-foreground hover:text-primary transition-colors"
                     >
                       info@ivoriansintexas.com
-                   </Link>
+                    </a>
                   </CardContent>
                 </Card>
 
@@ -199,7 +200,7 @@ const Contact = () => {
                     aria-label="Facebook"
                   >
                     <Facebook className="text-white" size={24} />
-                 </Link>
+                  </a>
                   <a
                     href="https://instagram.com/ivoriansintexas"
                     target="_blank"
@@ -208,7 +209,7 @@ const Contact = () => {
                     aria-label="Instagram"
                   >
                     <Instagram className="text-white" size={24} />
-                 </Link>
+                  </a>
                 </div>
               </div>
             </div>

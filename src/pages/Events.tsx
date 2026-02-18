@@ -2,12 +2,14 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import EventCard from "@/components/EventCard";
 import cultureImage from "@/assets/culture-celebration.jpg";
+import { Link } from "react-router-dom"; // Added Link import
+import { Button } from "@/components/ui/button"; // Optional: if you want a styled button
 
 const Events = () => {
   const events = [
     {
-      title: "Independence Day Celebration 2025",
-      date: "August 7, 2025",
+      title: "Independence Day Celebration 2026",
+      date: "August 7, 2026",
       location: "Dallas Convention Center, Dallas, TX",
       description: "Join us for a grand celebration of Ivorian independence with traditional food, music, dance performances, and cultural exhibitions. Bring the whole family!",
       attendees: 250,
@@ -15,35 +17,35 @@ const Events = () => {
     },
     {
       title: "Monthly Community Meetup - March",
-      date: "March 15, 2025",
+      date: "March 15, 2026",
       location: "Houston Community Hall, Houston, TX",
       description: "Connect with fellow Ivorians, share experiences, and discuss community initiatives. Open forum and networking session.",
       attendees: 80,
     },
     {
       title: "Cultural Night Gala",
-      date: "April 20, 2025",
+      date: "April 20, 2026",
       location: "Austin Ballroom, Austin, TX",
       description: "An elegant evening showcasing Ivorian art, fashion, and culinary excellence. Formal attire requested.",
       attendees: 150,
     },
     {
       title: "Youth Mentorship Program Kickoff",
-      date: "May 5, 2025",
+      date: "May 5, 2026",
       location: "San Antonio Youth Center, San Antonio, TX",
       description: "Launch event for our new mentorship program connecting young Ivorians with community leaders and professionals.",
       attendees: 60,
     },
     {
       title: "Summer Cookout & Family Day",
-      date: "June 15, 2025",
+      date: "June 15, 2026",
       location: "Fort Worth City Park, Fort Worth, TX",
       description: "Relax and enjoy good food, games, and quality time with the AIT family. Traditional Ivorian dishes and BBQ.",
       attendees: 200,
     },
     {
       title: "Business & Entrepreneurship Workshop",
-      date: "July 10, 2025",
+      date: "July 10, 2026",
       location: "Dallas Business Hub, Dallas, TX",
       description: "Learn from successful Ivorian entrepreneurs, network with business owners, and explore resources for starting your own business.",
       attendees: 45,
@@ -92,12 +94,12 @@ const Events = () => {
               AIT welcomes member-organized events. If you have an idea for a gathering, 
               workshop, or cultural activity, we'd love to hear from you!
             </p>
-            <a
-              href="/contact"
-              className="inline-block bg-gradient-primary text-white font-semibold px-8 py-4 rounded-xl hover:opacity-90 transition-opacity"
-            >
-              Contact Us About Your Event Idea
-           </Link>
+            {/* Fixed the typo: Changed <a> to <Link> and corrected the path */}
+            <Link to="/contact">
+              <Button className="bg-gradient-primary text-white font-semibold px-8 py-6 text-lg rounded-xl hover:opacity-90 transition-opacity">
+                Contact Us About Your Event Idea
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
