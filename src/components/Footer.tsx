@@ -1,4 +1,8 @@
+// src/components/Footer.tsx
+
 import { Facebook, Instagram, Mail, Phone } from "lucide-react";
+import { Link } from "react-router-dom";
+
 
 const Footer = () => {
   return (
@@ -27,24 +31,24 @@ const Footer = () => {
             <h4 className="font-semibold text-foreground mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <a href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   About Us
-                </a>
+               </Link>
               </li>
               <li>
-                <a href="/events" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/events" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Events
-                </a>
+               </Link>
               </li>
               <li>
-                <a href="/gallery" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/gallery" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Gallery
-                </a>
+               </Link>
               </li>
               <li>
-                <a href="/news" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/news" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   News
-                </a>
+               </Link>
               </li>
             </ul>
           </div>
@@ -68,24 +72,24 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-foreground mb-4">Follow Us</h4>
             <div className="flex gap-4">
-              <a
-                href="https://facebook.com/ivoriansintexas"
+              <Link
+                to="https://facebook.com/ivoriansintexas"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-muted hover:bg-primary transition-colors flex items-center justify-center group"
                 aria-label="Facebook"
               >
                 <Facebook size={20} className="text-foreground group-hover:text-primary-foreground" />
-              </a>
-              <a
-                href="https://instagram.com/ivoriansintexas"
+             </Link>
+              <Link
+                to="https://instagram.com/ivoriansintexas"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-muted hover:bg-primary transition-colors flex items-center justify-center group"
                 aria-label="Instagram"
               >
                 <Instagram size={20} className="text-foreground group-hover:text-primary-foreground" />
-              </a>
+             </Link>
             </div>
           </div>
         </div>
@@ -97,14 +101,14 @@ const Footer = () => {
 
   <p className="text-xs text-muted-foreground mt-2">
     Designed by{" "}
-    <a
-      href="https://buildandrun.net"
+    <Link
+      to="https://buildandrun.net"
       target="_blank"
       rel="noopener noreferrer"
       className="underline hover:text-primary transition-colors"
     >
       Build and Run
-    </a>
+   </Link>
   </p>
 </div>
 

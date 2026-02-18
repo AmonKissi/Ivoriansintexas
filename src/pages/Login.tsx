@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import API from "@/lib/api-configs";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth(); // From your AuthContext
+  const { login } = useAuth();
   
   // State for form and UI
   const [email, setEmail] = useState("");
@@ -23,16 +23,18 @@ const Login = () => {
     setError("");
 
     try {
-      // 1. Call your Node.js backend
+      // 1. Call your Node.js backend via Axios instance
       const { data } = await API.post("/auth/login", { email, password });
 
       // 2. Update global auth state (saves token & user info)
+      // data.result usually contains the user object from your controller
       login(data.token, data.result);
 
       // 3. Success! Redirect to dashboard
       navigate("/dashboard");
     } catch (err: any) {
       console.error("Login failed:", err);
+      // Handles both server error messages and generic connection issues
       setError(err.response?.data?.message || "Invalid email or password. Please try again.");
     } finally {
       setIsLoading(false);
@@ -88,9 +90,9 @@ const Login = () => {
                   <label className="text-sm font-medium text-foreground">
                     Password
                   </label>
-                  <a href="#" className="text-xs text-primary hover:underline">
+                  <Link to="/forgot-password" className="text-xs text-primary hover:underline">
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
@@ -125,17 +127,17 @@ const Login = () => {
             <div className="mt-8 pt-6 border-t border-border text-center">
               <p className="text-muted-foreground">
                 Don't have an account?{" "}
-                <a href="/signup" className="text-primary font-semibold hover:underline">
+                <Link to="/signup" className="text-primary font-semibold hover:underline">
                   Join the Association
-                </a>
+                </Link>
               </p>
             </div>
           </div>
 
           <div className="text-center mt-6">
-            <a href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               ← Back to homepage
-            </a>
+            </Link>
           </div>
         </div>
       </main>

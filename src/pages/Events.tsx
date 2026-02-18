@@ -97,7 +97,7 @@ const Events = () => {
               className="inline-block bg-gradient-primary text-white font-semibold px-8 py-4 rounded-xl hover:opacity-90 transition-opacity"
             >
               Contact Us About Your Event Idea
-            </a>
+           </Link>
           </div>
         </div>
       </section>

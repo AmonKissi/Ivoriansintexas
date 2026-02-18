@@ -152,7 +152,7 @@ const Contact = () => {
                       className="text-muted-foreground hover:text-primary transition-colors"
                     >
                       info@ivoriansintexas.com
-                    </a>
+                   </Link>
                   </CardContent>
                 </Card>
 
@@ -199,7 +199,7 @@ const Contact = () => {
                     aria-label="Facebook"
                   >
                     <Facebook className="text-white" size={24} />
-                  </a>
+                 </Link>
                   <a
                     href="https://instagram.com/ivoriansintexas"
                     target="_blank"
@@ -208,7 +208,7 @@ const Contact = () => {
                     aria-label="Instagram"
                   >
                     <Instagram className="text-white" size={24} />
-                  </a>
+                 </Link>
                 </div>
               </div>
             </div>

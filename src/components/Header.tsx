@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink } from "./NavLink";
 import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,10 +22,11 @@ const Header = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <NavLink to="/" className="flex items-center gap-3 group">
-            {/* <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center shadow-warm transition-transform duration-300 group-hover:scale-110">
-              <span className="text-2xl font-bold text-white">AIT</span>
-            </div> */}
-            <img src="/ait-logo.png" alt="AIT Logo" className="w-16 h-16 rounded-full shadow-warm transition-transform duration-300 group-hover:scale-110" />
+            <img 
+              src="/ait-logo.png" 
+              alt="AIT Logo" 
+              className="w-16 h-16 rounded-full shadow-warm transition-transform duration-300 group-hover:scale-110" 
+            />
             <div className="hidden md:block">
               <h1 className="text-xl font-bold text-foreground">AIT</h1>
               <p className="text-xs text-muted-foreground">Ivorians in Texas</p>
@@ -45,13 +47,13 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* CTA Button */}
+          {/* Desktop CTA Button */}
           <div className="hidden md:block">
-            <a href="/signup">
-            <Button className="bg-gradient-primary hover:opacity-90 transition-opacity">
-              Join Us
-            </Button>
-            </a>
+            <Link to="/signup">
+              <Button className="bg-gradient-primary hover:opacity-90 transition-opacity">
+                Join Us
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -64,7 +66,7 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation Overlay */}
         {isMenuOpen && (
           <nav className="md:hidden py-4 border-t border-border bg-background">
             <div className="flex flex-col gap-4">
@@ -79,11 +81,12 @@ const Header = () => {
                   {link.label}
                 </NavLink>
               ))}
-              <a  href="/signup">
-              <Button className="bg-gradient-primary hover:opacity-90 transition-opacity w-full">
-                Join Us
-              </Button>
-              </a>
+              {/* Mobile CTA Button */}
+              <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
+                <Button className="bg-gradient-primary hover:opacity-90 transition-opacity w-full">
+                  Join Us
+                </Button>
+              </Link>
             </div>
           </nav>
         )}

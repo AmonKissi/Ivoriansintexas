@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import API, { ENDPOINTS } from "@/lib/api-configs";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
   const { user, setUser, logout } = useAuth();

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // Added Link to imports
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -70,7 +70,7 @@ const SignUp = () => {
         <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           
           {/* Left Side: Value Proposition */}
-          <div className="hidden lg:block space-y-8 mt-12">
+          <div className="hidden lg:block space-y-8">
             <h1 className="text-5xl font-bold text-foreground leading-tight">
               Join the <span className="text-primary">AIT</span> Family
             </h1>
@@ -222,9 +222,10 @@ const SignUp = () => {
             <div className="mt-8 pt-6 border-t border-border text-center">
               <p className="text-muted-foreground">
                 Already a member?{" "}
-                <a href="/login" className="text-primary font-semibold hover:underline">
+                {/* Fixed internal Link */}
+                <Link to="/login" className="text-primary font-semibold hover:underline">
                   Sign In
-                </a>
+                </Link>
               </p>
             </div>
           </div>
