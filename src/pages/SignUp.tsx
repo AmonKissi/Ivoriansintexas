@@ -1,17 +1,66 @@
-// src/pages/SignUp.tsx
-
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Mail, Lock, User, MapPin, ArrowRight, CheckCircle2, Phone } from "lucide-react";
+import { 
+  UserPlus, Mail, Lock, User, MapPin, 
+  ArrowRight, CheckCircle2, Phone, Loader2 
+} from "lucide-react";
+import API from "@/lib/api-configs";
+import { useToast } from "@/hooks/use-toast";
 
 const SignUp = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Form State
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    city: "",
+    password: ""
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const benefits = [
     "Access to exclusive community events",
     "Professional networking opportunities",
     "Support during life transitions",
     "Cultural preservation initiatives"
   ];
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      // 1. Call your Node.js backend signup route
+      await API.post("/auth/signup", formData);
+
+      // 2. Success Toast
+      toast({
+        title: "Account Created!",
+        description: "Akwaba! Please sign in with your new credentials.",
+      });
+
+      // 3. Redirect to login page
+      navigate("/login");
+    } catch (err: any) {
+      console.error("Signup failed:", err);
+      setError(err.response?.data?.message || "Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -21,7 +70,7 @@ const SignUp = () => {
         <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           
           {/* Left Side: Value Proposition */}
-          <div className="hidden lg:block space-y-8 mt=12">
+          <div className="hidden lg:block space-y-8 mt-12">
             <h1 className="text-5xl font-bold text-foreground leading-tight">
               Join the <span className="text-primary">AIT</span> Family
             </h1>
@@ -49,62 +98,123 @@ const SignUp = () => {
               <p className="text-muted-foreground mt-2">Connect with the Ivorian diaspora</p>
             </div>
 
-            <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-              {/* Name Row */}
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm text-center">
+                {error}
+              </div>
+            )}
+
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground ml-1">First Name</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                    <input type="text" placeholder="Jean" className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all" />
+                    <input 
+                      type="text" 
+                      name="firstName"
+                      required
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      placeholder="Jean" 
+                      className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all" 
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground ml-1">Last Name</label>
-                  <input type="text" placeholder="Kouadio" className="w-full px-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all" />
+                  <input 
+                    type="text" 
+                    name="lastName"
+                    required
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    placeholder="Kouadio" 
+                    className="w-full px-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all" 
+                  />
                 </div>
               </div>
 
-              {/* Email Field */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground ml-1">Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                  <input type="email" placeholder="jean.k@example.com" className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all" />
+                  <input 
+                    type="email" 
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="jean.k@example.com" 
+                    className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all" 
+                  />
                 </div>
               </div>
 
-              {/* Phone Number Field */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground ml-1">Phone Number</label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                  <input type="tel" placeholder="+1 (555) 000-0000" className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all" />
+                  <input 
+                    type="tel" 
+                    name="phone"
+                    required
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="+1 (555) 000-0000" 
+                    className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all" 
+                  />
                 </div>
               </div>
 
-              {/* City Field */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground ml-1">City</label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                  <input type="text" placeholder="Your current city" className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all" />
+                  <input 
+                    type="text" 
+                    name="city"
+                    required
+                    value={formData.city}
+                    onChange={handleChange}
+                    placeholder="Your current city" 
+                    className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all" 
+                  />
                 </div>
               </div>
 
-              {/* Password Field */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground ml-1">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                  <input type="password" placeholder="••••••••" className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all" />
+                  <input 
+                    type="password" 
+                    name="password"
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="••••••••" 
+                    className="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all" 
+                  />
                 </div>
               </div>
 
               <div className="pt-2">
-                <Button size="lg" className="w-full bg-gradient-primary hover:opacity-90 transition-all shadow-md">
-                  Get Started
-                  <ArrowRight className="ml-2" size={20} />
+                <Button 
+                  type="submit"
+                  size="lg" 
+                  disabled={isLoading}
+                  className="w-full bg-gradient-primary hover:opacity-90 transition-all shadow-md"
+                >
+                  {isLoading ? (
+                    <Loader2 className="animate-spin mr-2" size={20} />
+                  ) : (
+                    <>
+                      Get Started
+                      <ArrowRight className="ml-2" size={20} />
+                    </>
+                  )}
                 </Button>
               </div>
             </form>
