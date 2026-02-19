@@ -1,9 +1,9 @@
 // src/hooks/useSocial.ts
 
+// src/hooks/useSocial.ts
 import { useState } from 'react';
-import { ENDPOINTS } from '@/lib/api-configs';
+import API, { ENDPOINTS } from '@/lib/api-configs';
 import { useToast } from './use-toast';
-import API from '@/lib/api-configs'; // Assuming this is your axios instance
 
 export const useSocial = () => {
   const { toast } = useToast();
@@ -19,7 +19,6 @@ export const useSocial = () => {
     }
     setLoading(true);
     try {
-      // Backend now returns roleLabel and connectionStatus automatically
       const { data } = await API.get(`${ENDPOINTS.USERS.SEARCH}?query=${query}`);
       setSearchResults(data);
     } catch (err: any) {
@@ -50,11 +49,9 @@ export const useSocial = () => {
   const sendRequest = async (targetId: string) => {
     try {
       setLoading(true);
-      const { data } = await API.post(`${ENDPOINTS.USERS.BASE}/request/${targetId}`);
-      
+      await API.post(`${ENDPOINTS.USERS.BASE}/request/${targetId}`);
       toast({ title: "Request Sent", description: "Waiting for approval." });
       
-      // Update local search state so button changes to 'Pending' immediately
       setSearchResults(prev => prev.map(u => 
         u._id === targetId ? { ...u, connectionStatus: 'pending_sent' } : u
       ));
@@ -63,6 +60,40 @@ export const useSocial = () => {
         variant: "destructive", 
         title: "Error", 
         description: err.response?.data?.message || "Could not send request" 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- NEW: ACCEPT FRIEND REQUEST ---
+  const acceptRequest = async (requestId: string) => {
+    setLoading(true);
+    try {
+      await API.post(`${ENDPOINTS.USERS.BASE}/accept/${requestId}`);
+      toast({ title: "Request Accepted", description: "You are now friends!" });
+    } catch (err: any) {
+      toast({ 
+        variant: "destructive", 
+        title: "Error", 
+        description: "Could not accept request." 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- NEW: REMOVE FRIEND ---
+  const removeFriend = async (friendId: string) => {
+    setLoading(true);
+    try {
+      await API.delete(`${ENDPOINTS.USERS.BASE}/friends/${friendId}`);
+      toast({ title: "Friend Removed", description: "Connection updated." });
+    } catch (err: any) {
+      toast({ 
+        variant: "destructive", 
+        title: "Error", 
+        description: "Could not remove friend." 
       });
     } finally {
       setLoading(false);
@@ -92,8 +123,11 @@ export const useSocial = () => {
     }
   };
 
+  // CRITICAL: All functions must be included here for MemberDirectory to see them
   return { 
     sendRequest, 
+    acceptRequest, // Added
+    removeFriend,  // Added
     toggleLike, 
     searchUsers, 
     searchEvents,

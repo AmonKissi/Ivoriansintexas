@@ -33,8 +33,9 @@ export const ENDPOINTS = {
   },
   EVENTS: {
     BASE: '/events',
-    SEARCH: '/events/search',              // Added for event search logic
-    RSVP: (id: string) => `/events/${id}/rsvp`, // Added functional RSVP
+    SEARCH: '/events/search',              
+    RSVP: (id: string) => `/events/${id}/rsvp`, 
+    DELETE: (id: string) => `/events/${id}`,
   }
 };
 
