@@ -88,9 +88,10 @@ const DashboardHeader = () => {
 
   const handleLogout = () => {
     logout();
-    navigate("/");
+    navigate("/login"); // This is a "soft" redirect that won't trigger a 404
   };
 
+  
   return (
     <header className="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
