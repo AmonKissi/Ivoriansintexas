@@ -12,6 +12,8 @@ export const ENDPOINTS = {
     SIGNUP: '/auth/signup',
     ME: '/auth/me',
     RESEND_VERIFICATION: '/auth/resend-verification',
+    FORGOT_PASSWORD: '/auth/forgot-password', // Added
+    RESET_PASSWORD: '/auth/reset-password',   // Added
   },
   USERS: {
     BASE: '/users',
@@ -23,6 +25,7 @@ export const ENDPOINTS = {
     SEARCH: '/users/search',
     REQUEST: (id: string) => `/users/request/${id}`, // Now takes ID
     ACCEPT: (id: string) => `/users/accept/${id}`,   // Now takes ID
+    DECLINE: (id: string) => `/users/decline/${id}`, // Now takes ID
     UNFRIEND: (id: string) => `/users/connection/${id}`, // New!
     NOTIFICATIONS: '/users/notifications/read',
   },
@@ -33,7 +36,10 @@ export const ENDPOINTS = {
     // Logic for likes and comments
     LIKE: (postId: string) => `/posts/${postId}/like`,
     COMMENT: (postId: string) => `/posts/${postId}/comments`,
+    LIKE_COMMENT: (postId: string, commentId: string) => `/posts/${postId}/comment/${commentId}/like`,
     DELETE: (postId: string) => `/posts/${postId}`,
+    REPORT: (postId: string) => `/posts/${postId}/report`,
+    DISMISS_REPORTS: (postId: string) => `/posts/${postId}/dismiss-reports`,
   },
   EVENTS: {
     BASE: '/events',
@@ -41,7 +47,16 @@ export const ENDPOINTS = {
     SEARCH: '/events/search',              
     RSVP: (id: string) => `/events/${id}/rsvp`, 
     DELETE: (id: string) => `/events/${id}`,
-  }
+  },
+ADMIN: {
+    STATS: '/admin/stats',
+    UPDATE_ROLE: '/admin/update-role',
+    GHOST_LOGIN: '/admin/ghost-login',
+    RESEND_VERIFY: '/admin/resend-verification',
+    TRIGGER_RESET: '/admin/trigger-reset',
+    DELETE_USER: (id: string) => `/admin/user/${id}`,
+    BAN_IP: '/admin/ban-ip', // Added for the IP Ban feature
+  },
 };
 
 // 3. Create the Axios Instance

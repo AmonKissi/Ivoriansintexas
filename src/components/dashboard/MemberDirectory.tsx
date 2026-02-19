@@ -13,44 +13,52 @@ import {
   UserMinus, 
   Clock,
   MapPin,
-  Loader2
+  Loader2,
+  Check,
+  X
 } from "lucide-react";
 import API, { ENDPOINTS } from "@/lib/api-configs";
 import { useSocial } from "@/hooks/useSocial";
-import { useToast } from "@/hooks/use-toast";
+import defaultProfile from "@/assets/default.png";
 
 const MemberDirectory = () => {
   const [members, setMembers] = useState([]);
   const [friends, setFriends] = useState([]);
-  const [requests, setRequests] = useState([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
   
-  const { sendRequest, acceptRequest, removeFriend } = useSocial();
-  const { toast } = useToast();
+  // Use the state and functions directly from our optimized hook
+  const { 
+    sendRequest, 
+    acceptRequest, 
+    declineRequest,
+    removeFriend, 
+    fetchPendingRequests, 
+    pendingRequests,
+    loading: socialLoading 
+  } = useSocial();
 
-  const fetchSocialData = async () => {
+  const [search, setSearch] = useState("");
+  const [searching, setSearching] = useState(false);
+
+  // 1. Fetch Friends (Custom fetch for this component)
+  const fetchFriends = async () => {
     try {
-      const [friendsRes, requestsRes] = await Promise.all([
-        API.get(`${ENDPOINTS.USERS.BASE}/friends`),
-        API.get(`${ENDPOINTS.USERS.BASE}/requests/pending`)
-      ]);
-      setFriends(friendsRes.data || []);
-      setRequests(requestsRes.data || []);
+      const { data } = await API.get(`${ENDPOINTS.USERS.BASE}/friends`);
+      setFriends(data || []);
     } catch (err) {
-      console.error("Social fetch failed", err);
+      console.error("Friends fetch failed", err);
     }
   };
 
+  // 2. Search Members
   const fetchMembers = async (query = "") => {
-    setLoading(true);
+    setSearching(true);
     try {
       const { data } = await API.get(`${ENDPOINTS.USERS.SEARCH}?query=${query}`);
       setMembers(data || []);
     } catch (err) {
       console.error("Search failed", err);
     } finally {
-      setLoading(false);
+      setSearching(false);
     }
   };
 
@@ -58,30 +66,30 @@ const MemberDirectory = () => {
     const delayDebounceFn = setTimeout(() => {
       fetchMembers(search);
     }, 300);
-
     return () => clearTimeout(delayDebounceFn);
   }, [search]);
 
   useEffect(() => {
-    fetchSocialData();
+    fetchFriends();
+    fetchPendingRequests(); // Hook handles the state for this
   }, []);
 
-  const handleAction = async (action: Function, id: string, message: string) => {
-    try {
-      await action(id);
-      toast({ title: "Success", description: message });
-      // Refresh everything
-      await fetchSocialData();
-      await fetchMembers(search);
-    } catch (err) {
-      toast({ variant: "destructive", title: "Action failed" });
+  // Optimized Action Handler
+  const handleSocialAction = async (action: Function, id: string) => {
+    const success = await action(id);
+    if (success) {
+      // Re-sync local component data
+      fetchFriends();
+      fetchPendingRequests();
+      fetchMembers(search);
     }
   };
 
-  // Helper to determine relationship status for the Discover tab
+  // Helper to determine relationship status
   const getButtonState = (memberId: string) => {
     if (friends.some((f: any) => f._id === memberId)) return "friends";
-    if (requests.some((r: any) => r.from?._id === memberId || r.to === memberId)) return "pending";
+    // Check if we sent a request or if one is pending for us
+    if (pendingRequests.some((r: any) => r._id === memberId)) return "pending_received";
     return "none";
   };
 
@@ -104,9 +112,9 @@ const MemberDirectory = () => {
           </TabsTrigger>
           <TabsTrigger value="requests" className="rounded-full gap-2 uppercase text-[10px] font-bold relative">
             <Clock size={14} /> Requests
-            {requests.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-orange-500 text-white w-5 h-5 rounded-full text-[10px] flex items-center justify-center border-2 border-background">
-                {requests.length}
+            {pendingRequests.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-orange-500 text-white w-5 h-5 rounded-full text-[10px] flex items-center justify-center border-2 border-background animate-pulse">
+                {pendingRequests.length}
               </span>
             )}
           </TabsTrigger>
@@ -121,7 +129,7 @@ const MemberDirectory = () => {
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 rounded-2xl border-muted bg-card shadow-sm h-12"
             />
-            {loading && <Loader2 className="absolute right-3 top-3 animate-spin text-primary" size={18} />}
+            {searching && <Loader2 className="absolute right-3 top-3 animate-spin text-primary" size={18} />}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -131,17 +139,24 @@ const MemberDirectory = () => {
                 <MemberCard key={member._id} member={member}>
                   {status === "friends" ? (
                     <span className="text-[10px] font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full uppercase">Friends</span>
-                  ) : status === "pending" ? (
-                    <Button disabled size="sm" variant="outline" className="rounded-full gap-2 italic">
-                      <Clock size={14} /> Pending
+                  ) : status === "pending_received" ? (
+                    <Button 
+                      size="sm" 
+                      className="bg-orange-500 hover:bg-orange-600 rounded-full text-[10px] font-bold"
+                      onClick={() => handleSocialAction(acceptRequest, member._id)}
+                    >
+                      Accept Request
                     </Button>
                   ) : (
                     <Button 
                       size="sm" 
+                      variant={member.connectionStatus === 'pending_sent' ? "outline" : "default"}
+                      disabled={member.connectionStatus === 'pending_sent'}
                       className="rounded-full gap-2"
-                      onClick={() => handleAction(sendRequest, member._id, "Request Sent!")}
+                      onClick={() => handleSocialAction(sendRequest, member._id)}
                     >
-                      <UserPlus size={14} /> Add
+                      {member.connectionStatus === 'pending_sent' ? <Clock size={14}/> : <UserPlus size={14} />}
+                      {member.connectionStatus === 'pending_sent' ? "Sent" : "Add"}
                     </Button>
                   )}
                 </MemberCard>
@@ -161,7 +176,7 @@ const MemberDirectory = () => {
                     variant="ghost" 
                     size="sm" 
                     className="text-muted-foreground hover:text-red-500 rounded-full"
-                    onClick={() => handleAction(removeFriend, friend._id, "Friend Removed")}
+                    onClick={() => handleSocialAction(removeFriend, friend._id)}
                   >
                     <UserMinus size={18} />
                   </Button>
@@ -173,18 +188,26 @@ const MemberDirectory = () => {
 
         <TabsContent value="requests">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {requests.length === 0 ? (
+            {pendingRequests.length === 0 ? (
               <EmptyState icon={<Clock size={40}/>} text="No pending requests." />
             ) : (
-              requests.map((request: any) => (
-                <MemberCard key={request._id} member={request.from}>
+              pendingRequests.map((sender: any) => (
+                <MemberCard key={sender._id} member={sender}>
                   <div className="flex gap-2">
                     <Button 
                       size="sm" 
-                      className="bg-green-600 hover:bg-green-700 text-white rounded-full px-4"
-                      onClick={() => handleAction(acceptRequest, request._id, "Friendship Accepted!")}
+                      className="bg-green-600 hover:bg-green-700 text-white rounded-full px-4 h-8"
+                      onClick={() => handleSocialAction(acceptRequest, sender._id)}
                     >
-                      Accept
+                      <Check size={14} className="mr-1"/> Accept
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      className="text-muted-foreground hover:text-destructive h-8 w-8 p-0 rounded-full"
+                      onClick={() => handleSocialAction(declineRequest, sender._id)}
+                    >
+                      <X size={16} />
                     </Button>
                   </div>
                 </MemberCard>
@@ -197,12 +220,17 @@ const MemberDirectory = () => {
   );
 };
 
+// Updated Card to handle images properly
 const MemberCard = ({ member, children }: { member: any, children: React.ReactNode }) => (
   <div className="bg-card p-4 rounded-3xl border border-border shadow-sm flex items-center justify-between transition-all hover:shadow-md">
     <div className="flex items-center gap-3">
       <Avatar className="h-12 w-12 border-2 border-primary/10">
-        <AvatarImage src={member.profileImage} />
-        <AvatarFallback className="font-bold bg-muted">{member.firstName?.[0]}</AvatarFallback>
+        <AvatarImage 
+            src={member.profileImage?.startsWith('http') ? member.profileImage : undefined} 
+        />
+        <AvatarFallback className="font-bold bg-muted">
+            {member.firstName?.[0]}
+        </AvatarFallback>
       </Avatar>
       <div>
         <p className="font-black italic uppercase tracking-tighter text-sm leading-tight">

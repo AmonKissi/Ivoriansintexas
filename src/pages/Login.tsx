@@ -10,7 +10,7 @@ import API from "@/lib/api-configs";
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  
+
   // State for form and UI
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,7 +35,10 @@ const Login = () => {
     } catch (err: any) {
       console.error("Login failed:", err);
       // Handles both server error messages and generic connection issues
-      setError(err.response?.data?.message || "Invalid email or password. Please try again.");
+      setError(
+        err.response?.data?.message ||
+          "Invalid email or password. Please try again.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -44,7 +47,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      
+
       <main className="flex-grow flex items-center justify-center py-20 px-4">
         <div className="w-full max-w-md">
           <div className="bg-card p-8 rounded-2xl shadow-elegant border border-border mt-12">
@@ -52,7 +55,9 @@ const Login = () => {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4 text-primary">
                 <LogIn size={32} />
               </div>
-              <h1 className="text-3xl font-bold text-foreground">Welcome Back</h1>
+              <h1 className="text-3xl font-bold text-foreground">
+                Welcome Back
+              </h1>
               <p className="text-muted-foreground mt-2">
                 Sign in to your AIT community account
               </p>
@@ -72,9 +77,12 @@ const Login = () => {
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                  <input 
-                    type="email" 
+                  <Mail
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    size={18}
+                  />
+                  <input
+                    type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -90,14 +98,20 @@ const Login = () => {
                   <label className="text-sm font-medium text-foreground">
                     Password
                   </label>
-                  <Link to="/forgot-password" className="text-xs text-primary hover:underline">
-                    Forgot password?
+                  <Link
+                    to="/forgot-password"
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors text-right block"
+                  >
+                    Forgot Password?
                   </Link>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                  <input 
-                    type="password" 
+                  <Lock
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    size={18}
+                  />
+                  <input
+                    type="password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -107,9 +121,9 @@ const Login = () => {
                 </div>
               </div>
 
-              <Button 
+              <Button
                 type="submit"
-                size="lg" 
+                size="lg"
                 disabled={isLoading}
                 className="w-full bg-gradient-primary hover:opacity-90 transition-opacity"
               >
@@ -127,7 +141,10 @@ const Login = () => {
             <div className="mt-8 pt-6 border-t border-border text-center">
               <p className="text-muted-foreground">
                 Don't have an account?{" "}
-                <Link to="/signup" className="text-primary font-semibold hover:underline">
+                <Link
+                  to="/signup"
+                  className="text-primary font-semibold hover:underline"
+                >
                   Join the Association
                 </Link>
               </p>
@@ -135,7 +152,10 @@ const Login = () => {
           </div>
 
           <div className="text-center mt-6">
-            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link
+              to="/"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
               ← Back to homepage
             </Link>
           </div>

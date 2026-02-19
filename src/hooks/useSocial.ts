@@ -1,7 +1,5 @@
 // src/hooks/useSocial.ts
-
-// src/hooks/useSocial.ts
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import API, { ENDPOINTS } from '@/lib/api-configs';
 import { useToast } from './use-toast';
 
@@ -10,8 +8,9 @@ export const useSocial = () => {
   const [loading, setLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [eventResults, setEventResults] = useState<any[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<any[]>([]);
 
-  // --- SEARCH USERS ---
+  // --- 1. SEARCH USERS ---
   const searchUsers = async (query: string) => {
     if (!query.trim()) {
       setSearchResults([]);
@@ -28,7 +27,7 @@ export const useSocial = () => {
     }
   };
 
-  // --- SEARCH EVENTS ---
+  // --- 2. SEARCH EVENTS ---
   const searchEvents = async (query: string) => {
     if (!query.trim()) {
       setEventResults([]);
@@ -45,13 +44,28 @@ export const useSocial = () => {
     }
   };
 
-  // --- FRIEND REQUESTS ---
+  // --- 3. FETCH PENDING REQUESTS ---
+  const fetchPendingRequests = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Calls the new route we added: /api/users/requests/pending
+      const { data } = await API.get(`${ENDPOINTS.USERS.BASE}/requests/pending`);
+      setPendingRequests(data);
+    } catch (err) {
+      console.error("Failed to fetch pending requests", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // --- 4. SEND FRIEND REQUEST ---
   const sendRequest = async (targetId: string) => {
     try {
       setLoading(true);
       await API.post(`${ENDPOINTS.USERS.BASE}/request/${targetId}`);
       toast({ title: "Request Sent", description: "Waiting for approval." });
       
+      // Update search results locally so the button changes to "Pending"
       setSearchResults(prev => prev.map(u => 
         u._id === targetId ? { ...u, connectionStatus: 'pending_sent' } : u
       ));
@@ -66,41 +80,73 @@ export const useSocial = () => {
     }
   };
 
-  // --- NEW: ACCEPT FRIEND REQUEST ---
+  // --- 5. ACCEPT FRIEND REQUEST ---
   const acceptRequest = async (requestId: string) => {
     setLoading(true);
     try {
       await API.post(`${ENDPOINTS.USERS.BASE}/accept/${requestId}`);
-      toast({ title: "Request Accepted", description: "You are now friends!" });
+      
+      // Remove from local pending list immediately
+      setPendingRequests(prev => prev.filter(r => r._id !== requestId));
+      
+      toast({ title: "Connected! 🇨🇮", description: "You are now friends!" });
+      return true;
     } catch (err: any) {
       toast({ 
         variant: "destructive", 
         title: "Error", 
         description: "Could not accept request." 
       });
+      return false;
     } finally {
       setLoading(false);
     }
   };
 
-  // --- NEW: REMOVE FRIEND ---
+  // --- 6. DECLINE FRIEND REQUEST ---
+  const declineRequest = async (requestId: string) => {
+    setLoading(true);
+    try {
+      await API.post(`${ENDPOINTS.USERS.BASE}/decline/${requestId}`);
+      
+      // Remove from local pending list immediately
+      setPendingRequests(prev => prev.filter(r => r._id !== requestId));
+      
+      toast({ title: "Request Declined", description: "The request was removed." });
+      return true;
+    } catch (err: any) {
+      toast({ 
+        variant: "destructive", 
+        title: "Error", 
+        description: "Could not decline request." 
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- 7. REMOVE FRIEND (UNFRIEND) ---
   const removeFriend = async (friendId: string) => {
     setLoading(true);
     try {
-      await API.delete(`${ENDPOINTS.USERS.BASE}/friends/${friendId}`);
+      // Matches the backend DELETE /connection/:targetUserId
+      await API.delete(`${ENDPOINTS.USERS.BASE}/connection/${friendId}`);
       toast({ title: "Friend Removed", description: "Connection updated." });
+      return true;
     } catch (err: any) {
       toast({ 
         variant: "destructive", 
         title: "Error", 
         description: "Could not remove friend." 
       });
+      return false;
     } finally {
       setLoading(false);
     }
   };
 
-  // --- SOCIAL ENGAGEMENT ---
+  // --- 8. SOCIAL ENGAGEMENT ---
   const toggleLike = async (postId: string) => {
     try {
       await API.put(`${ENDPOINTS.POSTS.BASE}/${postId}/like`);
@@ -123,17 +169,19 @@ export const useSocial = () => {
     }
   };
 
-  // CRITICAL: All functions must be included here for MemberDirectory to see them
   return { 
     sendRequest, 
-    acceptRequest, // Added
-    removeFriend,  // Added
+    acceptRequest, 
+    declineRequest, // Added
+    fetchPendingRequests, // Added
+    removeFriend, 
     toggleLike, 
     searchUsers, 
     searchEvents,
     rsvpToEvent,
     searchResults, 
     eventResults,
+    pendingRequests, // Added
     loading 
   };
 };

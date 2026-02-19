@@ -1,10 +1,13 @@
+// src/components/DashboardHeader.tsx
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { 
   LogOut, User, Bell, Check, X, UserPlus, 
   LayoutDashboard, UserCircle, Settings, Search, 
-  Calendar, Users, Command, ShieldCheck, Loader2
+  Calendar, Users, Command, ShieldCheck, Loader2,
+  ShieldAlert // Added for Admin icon
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -12,11 +15,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import API, { ENDPOINTS } from "@/lib/api-configs";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { getRoleName, getRoleColor } from '@/hooks/useUserRole';
+import { getRoleName, getRoleColor, useUserRole } from '@/hooks/useUserRole'; // Added useUserRole
 import { useSocial } from "@/hooks/useSocial";
 
 const DashboardHeader = () => {
   const { user, logout } = useAuth();
+  const { isModerator, roleNumber } = useUserRole(); // Extract role logic
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -37,6 +41,7 @@ const DashboardHeader = () => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const isDashboard = location.pathname === "/dashboard";
+  const isAdminPath = location.pathname === "/admin";
 
   // Navigation Helper
   const goToProfile = (userId?: string) => {
@@ -58,7 +63,6 @@ const DashboardHeader = () => {
 
   const fetchNotifications = async () => {
     try {
-      // FIX: Added parentheses to the function call
       const { data } = await API.get(ENDPOINTS.USERS.PROFILE());
       const userNotifications = data.notifications || [];
       setNotifications([...userNotifications].reverse());
@@ -113,6 +117,15 @@ const DashboardHeader = () => {
                   <LayoutDashboard size={16} /> Dashboard
                 </Button>
               </Link>
+              
+              {/* ADMIN DASHBOARD BUTTON (LEVEL 4+) */}
+              {isModerator && (
+                <Link to="/admin">
+                  <Button variant="ghost" className={cn("gap-2 h-9 px-3 transition-all", isAdminPath ? "bg-orange-500/10 text-orange-600 font-bold" : "text-muted-foreground hover:text-orange-600")}>
+                    <ShieldAlert size={16} /> Command Center
+                  </Button>
+                </Link>
+              )}
             </nav>
           </div>
 
@@ -136,7 +149,7 @@ const DashboardHeader = () => {
               </div>
             </div>
 
-            {/* LIVE SEARCH DROPDOWN */}
+            {/* LIVE SEARCH DROPDOWN (UNCHANGED) */}
             {isSearchFocused && searchQuery.length >= 2 && (
               <div className="absolute top-full left-0 w-full mt-2 bg-card border rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
                 <div className="max-h-[400px] overflow-y-auto p-2">
@@ -149,7 +162,7 @@ const DashboardHeader = () => {
                         <div 
                           key={res._id} 
                           className="flex items-center justify-between p-2 hover:bg-muted rounded-xl transition-colors group cursor-pointer"
-                          onClick={() => goToProfile(res._id)} // Navigate on click
+                          onClick={() => goToProfile(res._id)}
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full overflow-hidden bg-primary/10 border border-border">
@@ -168,7 +181,7 @@ const DashboardHeader = () => {
                             size="sm" 
                             variant="ghost" 
                             onClick={(e) => {
-                              e.stopPropagation(); // Prevents navigating to profile when just clicking 'Add'
+                              e.stopPropagation();
                               sendRequest(res._id);
                             }} 
                             className="h-8 w-8 p-0 rounded-full hover:bg-primary/10 text-primary"
@@ -226,7 +239,7 @@ const DashboardHeader = () => {
                       <div 
                         key={i} 
                         className={cn("p-4 border-b flex flex-col gap-2 transition-colors cursor-pointer", !n.read ? 'bg-primary/5' : 'hover:bg-muted/30')}
-                        onClick={() => goToProfile(n.relatedUser)} // Navigate to the person in the notification
+                        onClick={() => goToProfile(n.relatedUser)}
                       >
                         <div className="flex gap-3">
                            {n.type === 'friend_request' ? <UserPlus size={16} className="text-blue-500" /> : <Bell size={16} className="text-orange-500" />}
@@ -279,6 +292,19 @@ const DashboardHeader = () => {
                 </div>
 
                 <div className="space-y-1 pt-1">
+                  {/* ADMIN SHORTCUT IN DROPDOWN */}
+                  {isModerator && (
+                    <Link to="/admin">
+                      <Button variant="ghost" className="w-full justify-start h-11 text-sm gap-3 rounded-xl px-2.5 text-orange-600 hover:bg-orange-50">
+                        <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center"><ShieldAlert size={16} /></div>
+                        <div className="flex flex-col items-start leading-none">
+                          <span className="font-semibold">Admin Panel</span>
+                          <span className="text-[10px] opacity-70 font-normal mt-0.5">Management tools</span>
+                        </div>
+                      </Button>
+                    </Link>
+                  )}
+
                   <Link to="/profile">
                     <Button variant="ghost" className="w-full justify-start h-11 text-sm gap-3 rounded-xl px-2.5">
                       <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center"><User size={16} className="text-blue-600" /></div>

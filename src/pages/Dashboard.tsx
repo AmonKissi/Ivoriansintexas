@@ -1,3 +1,5 @@
+// src/pages/Dashboard.tsx
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import API, { ENDPOINTS } from "@/lib/api-configs";
@@ -32,9 +34,11 @@ import { useNavigate } from "react-router-dom";
 import CommunityFeed from "@/components/dashboard/CommunityFeed";
 import UpcomingEvents from "@/components/dashboard/UpcomingEvents";
 import defaultProfile from "@/assets/default.png";
+import { useSocial } from "@/hooks/useSocial";
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { acceptRequest, declineRequest, removeFriend, fetchPendingRequests, pendingRequests } = useSocial();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
@@ -55,28 +59,25 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchProfile();
+    fetchPendingRequests();
   }, []);
+
 
   // --- SOCIAL ACTIONS ---
   const handleAcceptRequest = async (requesterId: string) => {
-    try {
-      await API.post(ENDPOINTS.USERS.ACCEPT(requesterId));
-      toast({ title: "Connected!", description: "You have a new friend." });
-      fetchProfile(); // Refresh lists
-    } catch (err) {
-      toast({ variant: "destructive", title: "Error", description: "Could not accept request." });
-    }
+    const success = await acceptRequest(requesterId);
+    if (success) fetchProfile();
+  };
+
+  const handleDeclineRequest = async (requesterId: string) => {
+    const success = await declineRequest(requesterId);
+    if (success) fetchProfile();
   };
 
   const handleUnfriend = async (targetId: string) => {
     if (!confirm("Are you sure you want to remove this connection?")) return;
-    try {
-      await API.delete(ENDPOINTS.USERS.UNFRIEND(targetId));
-      toast({ title: "Removed", description: "Connection removed." });
-      fetchProfile();
-    } catch (err) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to remove friend." });
-    }
+    const success = await removeFriend(targetId);
+    if (success) fetchProfile();
   };
 
   const handleResendEmail = async () => {
@@ -113,7 +114,7 @@ const Dashboard = () => {
 
       <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          
+
           {/* LEFT COLUMN */}
           <div className="w-full lg:w-1/4 space-y-6">
             <Card className="p-6 text-center border-none shadow-lg bg-card relative overflow-hidden">
@@ -201,37 +202,77 @@ const Dashboard = () => {
               </TabsContent>
 
               <TabsContent value="friends" className="mt-0 space-y-6">
-                {/* 1. Pending Requests Section (Only shows if there are some) */}
-                {profile?.friendRequestsReceived?.length > 0 && (
-                   <Card className="p-6 border-none shadow-md bg-blue-50/50">
-                      <h3 className="font-bold text-sm mb-4 flex items-center gap-2 text-blue-900 uppercase tracking-widest">
-                        <UserPlus size={16} /> Pending Requests
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {profile.notifications?.filter((n:any) => n.type === 'friend_request' && !n.read).map((n:any) => (
-                          <div key={n.senderId} className="bg-white p-3 rounded-xl border flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-muted overflow-hidden">
-                                <img src={defaultProfile} className="w-full h-full object-cover" />
+                {/* 1. Pending Requests Section */}
+                {profile?.notifications?.some((n: any) => n.type === 'friend_request' && !n.read) && (
+                  <Card className="p-6 border-none shadow-md bg-orange-50/30 border-l-4 border-orange-500">
+                    <h3 className="font-bold text-sm mb-4 flex items-center gap-2 text-orange-900 uppercase tracking-widest">
+                      <UserPlus size={16} /> Pending Requests
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {profile.notifications
+                        .filter((n: any) => n.type === 'friend_request' && !n.read)
+                        .map((n: any) => {
+                          // Because we used .populate() in the backend, relatedUser is now an object
+                          const sender = n.relatedUser;
+                          const senderId = sender?._id;
+
+                          return (
+                            <div key={n._id} className="bg-white p-3 rounded-xl border shadow-sm flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-muted overflow-hidden border">
+                                  <img
+                                    src={sender?.profileImage || defaultProfile}
+                                    className="w-full h-full object-cover"
+                                    alt="Sender"
+                                  />
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-bold truncate max-w-[120px]">
+                                    {sender ? `${sender.firstName} ${sender.lastName}` : "Unknown User"}
+                                  </span>
+                                  <span className="text-[10px] text-muted-foreground">Sent you a request</span>
+                                </div>
                               </div>
-                              <span className="text-sm font-bold truncate max-w-[120px]">{n.message.split(' sent')[0]}</span>
+
+                              <div className="flex gap-2">
+                                {senderId ? (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      className="bg-green-600 hover:bg-green-700 h-8 px-2 shadow-sm"
+                                      onClick={() => handleAcceptRequest(senderId)}
+                                    >
+                                      <Check size={14} />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-8 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                      onClick={() => handleDeclineRequest(senderId)}
+                                    >
+                                      <X size={14} />
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <Button variant="ghost" size="sm" disabled className="text-[10px] uppercase font-bold">
+                                    Invalid
+                                  </Button>
+                                )}
+                              </div>
                             </div>
-                            <div className="flex gap-2">
-                              <Button size="sm" className="bg-green-600 hover:bg-green-700 h-8 px-2" onClick={() => handleAcceptRequest(n.relatedUser)}>
-                                <Check size={14} />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                   </Card>
+                          );
+                        })}
+                    </div>
+                  </Card>
                 )}
 
                 {/* 2. Friends Grid */}
                 <Card className="p-6 border-none shadow-sm min-h-[400px]">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="font-bold text-lg">Your Friends</h3>
-                    <span className="text-xs bg-muted px-2 py-1 rounded-full font-medium">{profile?.connections?.length || 0} Connections</span>
+                    <span className="text-xs bg-muted px-2 py-1 rounded-full font-medium">
+                      {profile?.connections?.length || 0} Connections
+                    </span>
                   </div>
 
                   {profile?.connections?.length === 0 ? (
@@ -245,23 +286,31 @@ const Dashboard = () => {
                         <div key={friend._id} className="group p-4 border rounded-2xl hover:border-primary/50 transition-all bg-card hover:shadow-md">
                           <div className="flex flex-col items-center text-center">
                             <div className="w-16 h-16 rounded-full overflow-hidden mb-3 border-2 border-muted group-hover:border-primary/20 transition-colors">
-                              <img src={friend.profileImage || defaultProfile} className="w-full h-full object-cover" />
+                              <img
+                                src={friend.profileImage || defaultProfile}
+                                className="w-full h-full object-cover"
+                                alt={friend.firstName}
+                              />
                             </div>
-                            <h4 className="font-bold text-sm leading-tight">{friend.firstName} {friend.lastName}</h4>
-                            <p className="text-[10px] text-muted-foreground mb-3">{friend.city || "Texas Member"}</p>
-                            
+                            <h4 className="font-bold text-sm leading-tight">
+                              {friend.firstName} {friend.lastName}
+                            </h4>
+                            <p className="text-[10px] text-muted-foreground mb-3">
+                              {friend.city || "Texas Member"}
+                            </p>
+
                             <div className="flex gap-2 w-full mt-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
+                              <Button
+                                variant="outline"
+                                size="sm"
                                 className="flex-1 h-8 text-[10px] font-bold gap-1 rounded-lg"
-                                onClick={() => navigate(`/profile/${friend._id}`)}
+                                onClick={() => navigate(`/profile/${friend.username || friend._id}`)}
                               >
                                 <ExternalLink size={12} /> Profile
                               </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
                                 onClick={() => handleUnfriend(friend._id)}
                               >
@@ -302,22 +351,22 @@ const Dashboard = () => {
                 {strength < 100 && (
                   <div className="p-3 bg-muted/50 rounded-xl space-y-2 border border-border/50">
                     <p className="text-[10px] font-black uppercase text-muted-foreground mb-1">Boost your profile:</p>
-                    {strength < 85 && <p className="text-[10px] flex items-center gap-2 font-medium text-orange-600"><ShieldAlert size={12}/> Verify Email (+85%)</p>}
-                    {!profile?.profileImage && <p className="text-[10px] flex items-center gap-2 font-medium text-primary"><PlusCircle size={12}/> Profile Picture (+10%)</p>}
+                    {strength < 85 && <p className="text-[10px] flex items-center gap-2 font-medium text-orange-600"><ShieldAlert size={12} /> Verify Email (+85%)</p>}
+                    {!profile?.profileImage && <p className="text-[10px] flex items-center gap-2 font-medium text-primary"><PlusCircle size={12} /> Profile Picture (+10%)</p>}
                   </div>
                 )}
               </div>
             </Card>
 
             <Card className="p-5 border-none shadow-sm bg-green-50/50 rounded-2xl border-l-4 border-green-500">
-                <div className="flex items-center gap-2 text-green-700 font-bold mb-2">
-                    <Calendar size={18} />
-                    <span>Post an Event?</span>
-                </div>
-                <p className="text-xs text-green-800/80 mb-4 leading-relaxed">Planning a community BBQ or business mixer?</p>
-                <Button onClick={() => setActiveTab("events")} size="sm" className="w-full bg-green-600 hover:bg-green-700 text-xs font-bold rounded-xl shadow-lg shadow-green-200">
-                    Create Event <ArrowUpRight size={14} className="ml-1" />
-                </Button>
+              <div className="flex items-center gap-2 text-green-700 font-bold mb-2">
+                <Calendar size={18} />
+                <span>Post an Event?</span>
+              </div>
+              <p className="text-xs text-green-800/80 mb-4 leading-relaxed">Planning a community BBQ or business mixer?</p>
+              <Button onClick={() => setActiveTab("events")} size="sm" className="w-full bg-green-600 hover:bg-green-700 text-xs font-bold rounded-xl shadow-lg shadow-green-200">
+                Create Event <ArrowUpRight size={14} className="ml-1" />
+              </Button>
             </Card>
           </div>
         </div>
