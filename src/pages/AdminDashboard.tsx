@@ -36,6 +36,37 @@ const AdminDashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [reportedPosts, setReportedPosts] = useState<any[]>([]);
+  const [isMaintenance, setIsMaintenance] = useState(false);
+
+  // Add to your initCommandCenter or a separate useEffect to fetch current status
+const fetchSystemStatus = async () => {
+  try {
+    const { data } = await API.get('/admin/system-status'); // You'll need this endpoint
+    setIsMaintenance(data.maintenance);
+  } catch (err) {
+    console.error("Failed to fetch system status");
+  }
+};
+
+const handleToggleMaintenance = async () => {
+  const action = isMaintenance ? "DEACTIVATE LOCKOUT" : "INITIATE SYSTEM MAINTENANCE";
+  const desc = isMaintenance 
+    ? "This will restore public access to the Texas Registry." 
+    : "This will block all users below Level 4 Clearance. Only Admins will be able to log in.";
+
+  if (!confirmAction(action, desc)) return;
+
+  try {
+    const { data } = await API.patch('/admin/system-status', { maintenance: !isMaintenance });
+    setIsMaintenance(data.maintenance);
+    toast({ 
+      title: data.maintenance ? "System Locked" : "System Online", 
+      description: data.maintenance ? "Maintenance protocol active." : "Public access restored." 
+    });
+  } catch (err) {
+    toast({ variant: "destructive", title: "Protocol Error", description: "Could not update system status." });
+  }
+};
 
   const fetchReportedContent = async () => {
   try {
@@ -64,7 +95,8 @@ const handleDismiss = async (postId: string) => {
     try {
       await checkUser(); // Force sync Level 6 status
       await fetchStats();
-      await fetchReportedContent(); // Pull flagged posts on load
+      await fetchReportedContent(); 
+      await fetchSystemStatus();
     } catch (err) {
       console.error("Initialization failed", err);
     }
@@ -315,31 +347,71 @@ const handleDismiss = async (postId: string) => {
           </Card>
 
           {/* YOUR EXISTING HIERARCHY SIDEBAR */}
-          <div className="space-y-6">
-            <Card className="border-none shadow-xl rounded-[2rem] bg-card/50 backdrop-blur-md border border-border/40 p-6">
-              <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-6 flex items-center gap-2">
-                <UserCog size={14}/> Node Distribution
-              </CardTitle>
-              <div className="space-y-6">
-                {stats?.usersByLevel?.map((lg: any) => (
-                  <div key={lg._id} className="space-y-2">
-                    <div className="flex justify-between text-[9px] font-black uppercase italic">
-                      <span>{getRoleName(lg._id)}</span>
-                      <span className="text-primary font-mono">{lg.count}</span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
-                      <div className="bg-primary h-full transition-all duration-1000" style={{ width: `${(lg.count / (stats?.summary?.totalUsers || 1)) * 100}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-            <Card className="border-none shadow-xl rounded-[2rem] bg-amber-500/5 p-6 border border-dashed border-amber-500/20 text-center">
-              <p className="text-[9px] font-black uppercase opacity-60 leading-relaxed italic">
-                Level 6 Session Active. <br/> All administrative protocols are logged.
-              </p>
-            </Card>
+<div className="space-y-6">
+  {/* NEW: SYSTEM PROTOCOL (MAINTENANCE TOGGLE) */}
+  {isOwner && (
+    <Card className="border-none shadow-xl rounded-[2rem] bg-slate-900 text-white p-6 overflow-hidden relative border border-white/10">
+      {/* Background Graphic */}
+      <div className="absolute -right-6 -bottom-6 opacity-10 rotate-12">
+        <ShieldAlert size={120} />
+      </div>
+      
+      <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-6 flex items-center gap-2 relative z-10">
+        <LayoutDashboard size={14}/> System Protocol
+      </CardTitle>
+      
+      <div className="space-y-4 relative z-10">
+        <div className="flex items-center justify-between bg-white/5 p-3 rounded-2xl border border-white/5">
+          <span className="text-[9px] font-black uppercase italic text-white/70">Registry Status</span>
+          <span className={cn(
+            "px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-tighter",
+            isMaintenance ? "bg-red-500 text-white animate-pulse" : "bg-green-500 text-white"
+          )}>
+            {isMaintenance ? "Maintenance Active" : "Fully Operational"}
+          </span>
+        </div>
+        
+        <Button 
+          variant={isMaintenance ? "default" : "destructive"}
+          className={cn(
+            "w-full rounded-xl font-black uppercase text-[9px] tracking-[0.2em] h-12 transition-all shadow-lg",
+            isMaintenance ? "bg-white text-slate-900 hover:bg-white/90" : "bg-red-600 hover:bg-red-700"
+          )}
+          onClick={handleToggleMaintenance}
+        >
+          {isMaintenance ? "Disable Lockout" : "Initiate Lockout"}
+        </Button>
+      </div>
+    </Card>
+  )}
+
+  {/* EXISTING: NODE DISTRIBUTION */}
+  <Card className="border-none shadow-xl rounded-[2rem] bg-card/50 backdrop-blur-md border border-border/40 p-6">
+    <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-6 flex items-center gap-2">
+      <UserCog size={14}/> Node Distribution
+    </CardTitle>
+    <div className="space-y-6">
+      {stats?.usersByLevel?.map((lg: any) => (
+        <div key={lg._id} className="space-y-2">
+          <div className="flex justify-between text-[9px] font-black uppercase italic">
+            <span>{getRoleName(lg._id)}</span>
+            <span className="text-primary font-mono">{lg.count}</span>
           </div>
+          <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+            <div className="bg-primary h-full transition-all duration-1000" style={{ width: `${(lg.count / (stats?.summary?.totalUsers || 1)) * 100}%` }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  </Card>
+
+  {/* EXISTING: SESSION INFO */}
+  <Card className="border-none shadow-xl rounded-[2rem] bg-amber-500/5 p-6 border border-dashed border-amber-500/20 text-center">
+    <p className="text-[9px] font-black uppercase opacity-60 leading-relaxed italic">
+      Level 6 Session Active. <br/> All administrative protocols are logged.
+    </p>
+  </Card>
+</div>
         </div>
       </TabsContent>
 

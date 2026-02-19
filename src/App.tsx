@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import API from "@/lib/api-configs";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,12 +18,13 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
-import Dashboard from "./pages/Dashboard"; 
-import Profile from "./pages/Profile";     
+import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
 import VerifyEmail from "./pages/VerifyEmail";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import AdminDashboard from "./pages/AdminDashboard";
+import Maintenance from "./pages/Maintenance"; // Add this
 
 const queryClient = new QueryClient();
 
@@ -32,9 +35,13 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div className="h-screen flex items-center justify-center font-black italic uppercase animate-pulse">Loading AIT...</div>;
+    return (
+      <div className="h-screen flex items-center justify-center font-black italic uppercase animate-pulse">
+        Loading AIT...
+      </div>
+    );
   }
-  
+
   return user ? <>{children}</> : <Navigate to="/login" />;
 };
 
@@ -45,8 +52,6 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   const { roleNumber } = useUserRole(); // This will now work because AdminRoute is inside AuthProvider
 
-  if (loading) return null;
-
   // If not logged in or level too low, kick back to home
   if (!user || roleNumber < 4) {
     return <Navigate to="/" replace />;
@@ -56,7 +61,39 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const AppRoutes = () => {
-  // We move routes here to safely use hooks like useUserRole
+  const [isMaintenance, setIsMaintenance] = useState(false);
+
+  // Removed 'loading: roleLoading' since your hook doesn't provide it
+  const { roleNumber } = useUserRole();
+  const { loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      try {
+        const { data } = await API.get("/admin/system-status");
+        setIsMaintenance(data.maintenance);
+      } catch (err) {
+        console.error("Maintenance check failed", err);
+        setIsMaintenance(false);
+      }
+    };
+    checkStatus();
+  }, []);
+
+  // Only check authLoading here
+  if (authLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center font-black italic uppercase animate-pulse text-xs tracking-widest bg-background">
+        Establishing Secure Link...
+      </div>
+    );
+  }
+
+  // Comment out this to prevent blocking access to the maintenance page for admins
+  if (isMaintenance && roleNumber < 4) {
+    return <Maintenance />;
+  }
+
   return (
     <Routes>
       {/* Public Routes */}
@@ -73,31 +110,31 @@ const AppRoutes = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Protected Member Routes */}
-      <Route 
-        path="/dashboard" 
+      <Route
+        path="/dashboard"
         element={
           <PrivateRoute>
             <Dashboard />
           </PrivateRoute>
-        } 
+        }
       />
-      <Route 
+      <Route
         path="/profile/:identifier?"
         element={
           <PrivateRoute>
             <Profile />
           </PrivateRoute>
-        } 
+        }
       />
 
       {/* Admin Route - Level 4, 5, 6 only */}
-      <Route 
-        path="/admin" 
+      <Route
+        path="/admin"
         element={
           <AdminRoute>
             <AdminDashboard />
           </AdminRoute>
-        } 
+        }
       />
 
       {/* 404 Route */}
