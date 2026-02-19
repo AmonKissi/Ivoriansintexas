@@ -192,8 +192,8 @@ const handleLikeComment = async (postId: string, commentId: string) => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2 rounded-full bg-muted/50 p-1 border border-border/20">
-          <TabsTrigger value="all" className="rounded-full gap-2 text-[10px] font-bold uppercase"><LayoutGrid size={14} /> Global Pulse</TabsTrigger>
-          <TabsTrigger value="mine" className="rounded-full gap-2 text-[10px] font-bold uppercase"><User size={14} /> My Transmissions</TabsTrigger>
+          <TabsTrigger value="all" className="rounded-full gap-2 text-[10px] font-bold uppercase"><LayoutGrid size={14} /> Community Feed</TabsTrigger>
+          <TabsTrigger value="mine" className="rounded-full gap-2 text-[10px] font-bold uppercase"><User size={14} /> My Feed</TabsTrigger>
         </TabsList>
 
         <TabsContent value={activeTab} className="mt-6 space-y-4">
