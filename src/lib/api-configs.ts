@@ -14,25 +14,30 @@ export const ENDPOINTS = {
     RESEND_VERIFICATION: '/auth/resend-verification',
   },
   USERS: {
-    BASE: '/users',                        // Added for general user routes
-    PROFILE: '/users/profile',
-    PASSWORD: '/users/profile/password',   // Matched to your updated controller
+    BASE: '/users',
+    // UPDATED: Function to handle both /profile (self) and /profile/:id (others)
+    PROFILE: (userId?: string) => userId ? `/users/profile/${userId}` : '/users/profile',
+    PASSWORD: '/users/profile/password',
     DEACTIVATE: '/users/profile/deactivate',
     UPLOAD_PICTURE: '/users/profile-picture',
     SEARCH: '/users/search',
-    REQUEST: '/users/request',
-    ACCEPT: '/users/accept',
+    REQUEST: (id: string) => `/users/request/${id}`, // Now takes ID
+    ACCEPT: (id: string) => `/users/accept/${id}`,   // Now takes ID
+    UNFRIEND: (id: string) => `/users/connection/${id}`, // New!
     NOTIFICATIONS: '/users/notifications/read',
   },
   POSTS: {
-    BASE: '/posts',                        // Added for general post routes
+    BASE: '/posts',
     FEED: '/posts',
     CREATE: '/posts',
+    // Logic for likes and comments
     LIKE: (postId: string) => `/posts/${postId}/like`,
-    COMMENT: (postId: string) => `/posts/${postId}/comment`,
+    COMMENT: (postId: string) => `/posts/${postId}/comments`,
+    DELETE: (postId: string) => `/posts/${postId}`,
   },
   EVENTS: {
     BASE: '/events',
+    GET_ALL: "/events",
     SEARCH: '/events/search',              
     RSVP: (id: string) => `/events/${id}/rsvp`, 
     DELETE: (id: string) => `/events/${id}`,
@@ -52,9 +57,10 @@ API.interceptors.request.use((req) => {
     req.headers.Authorization = `Bearer ${token}`;
   }
 
-  // Axios handles multipart/form-data boundaries automatically when sending FormData
-  // It's often safer to let Axios set the Content-Type for FormData
-  if (!(req.data instanceof FormData)) {
+  // Auto-detect FormData to let browser set boundary
+  if (req.data instanceof FormData) {
+    delete req.headers['Content-Type'];
+  } else {
     req.headers['Content-Type'] = 'application/json';
   }
 
@@ -68,13 +74,12 @@ API.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      // Optional: window.location.href = '/login';
+      // Prevent infinite loops by checking current path
+      if (!window.location.pathname.includes('/login')) {
+         window.location.href = '/login';
+      }
     }
     
-    if (import.meta.env.DEV) {
-      console.error(`[API Error] ${error.response?.status}:`, error.response?.data || error.message);
-    }
-
     return Promise.reject(error);
   }
 );

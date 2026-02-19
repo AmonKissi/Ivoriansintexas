@@ -1,106 +1,66 @@
+import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import EventCard from "@/components/EventCard";
-import cultureImage from "@/assets/culture-celebration.jpg";
-import { Link } from "react-router-dom"; // Added Link import
-import { Button } from "@/components/ui/button"; // Optional: if you want a styled button
+import API, { ENDPOINTS } from "@/lib/api-configs";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Loader2, CalendarDays } from "lucide-react";
 
 const Events = () => {
-  const events = [
-    {
-      title: "Independence Day Celebration 2026",
-      date: "August 7, 2026",
-      location: "Dallas Convention Center, Dallas, TX",
-      description: "Join us for a grand celebration of Ivorian independence with traditional food, music, dance performances, and cultural exhibitions. Bring the whole family!",
-      attendees: 250,
-      image: cultureImage,
-    },
-    {
-      title: "Monthly Community Meetup - March",
-      date: "March 15, 2026",
-      location: "Houston Community Hall, Houston, TX",
-      description: "Connect with fellow Ivorians, share experiences, and discuss community initiatives. Open forum and networking session.",
-      attendees: 80,
-    },
-    {
-      title: "Cultural Night Gala",
-      date: "April 20, 2026",
-      location: "Austin Ballroom, Austin, TX",
-      description: "An elegant evening showcasing Ivorian art, fashion, and culinary excellence. Formal attire requested.",
-      attendees: 150,
-    },
-    {
-      title: "Youth Mentorship Program Kickoff",
-      date: "May 5, 2026",
-      location: "San Antonio Youth Center, San Antonio, TX",
-      description: "Launch event for our new mentorship program connecting young Ivorians with community leaders and professionals.",
-      attendees: 60,
-    },
-    {
-      title: "Summer Cookout & Family Day",
-      date: "June 15, 2026",
-      location: "Fort Worth City Park, Fort Worth, TX",
-      description: "Relax and enjoy good food, games, and quality time with the AIT family. Traditional Ivorian dishes and BBQ.",
-      attendees: 200,
-    },
-    {
-      title: "Business & Entrepreneurship Workshop",
-      date: "July 10, 2026",
-      location: "Dallas Business Hub, Dallas, TX",
-      description: "Learn from successful Ivorian entrepreneurs, network with business owners, and explore resources for starting your own business.",
-      attendees: 45,
-    },
-  ];
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        // Now that GET_ALL is in your config, this will work
+        const { data } = await API.get(ENDPOINTS.EVENTS.GET_ALL); 
+        setEvents(data);
+      } catch (err) {
+        console.error("Error fetching events:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 bg-gradient-to-br from-primary/10 via-background to-secondary/10">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-              Community Events
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              Join us at our vibrant gatherings, cultural celebrations, and community activities
-            </p>
-          </div>
+      <section className="pt-32 pb-20 bg-gradient-to-br from-orange-500/10 via-background to-green-600/10">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-5xl md:text-6xl font-black text-foreground mb-6 tracking-tighter italic uppercase">
+            Community Events
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Discover cultural celebrations and social meetups across Texas.
+          </p>
         </div>
       </section>
 
-      {/* Events Grid */}
       <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
+        <div className="container mx-auto px-4 max-w-6xl">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="animate-spin text-primary mb-4" size={48} />
+              <p className="text-muted-foreground font-medium">Loading upcoming events...</p>
+            </div>
+          ) : events.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {events.map((event, index) => (
-                <EventCard key={index} {...event} />
+              {events.map((event) => (
+                <EventCard key={event._id} {...event} />
               ))}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Call to Action */}
-      <section className="py-20 bg-muted">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-              Want to Host an Event?
-            </h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              AIT welcomes member-organized events. If you have an idea for a gathering, 
-              workshop, or cultural activity, we'd love to hear from you!
-            </p>
-            {/* Fixed the typo: Changed <a> to <Link> and corrected the path */}
-            <Link to="/contact">
-              <Button className="bg-gradient-primary text-white font-semibold px-8 py-6 text-lg rounded-xl hover:opacity-90 transition-opacity">
-                Contact Us About Your Event Idea
-              </Button>
-            </Link>
-          </div>
+          ) : (
+            <div className="text-center py-20 border-2 border-dashed rounded-3xl">
+              <CalendarDays className="mx-auto text-muted-foreground/20 mb-4" size={64} />
+              <h3 className="text-xl font-bold">No upcoming events</h3>
+              <p className="text-muted-foreground">Check back soon for new community gatherings!</p>
+            </div>
+          )}
         </div>
       </section>
 
