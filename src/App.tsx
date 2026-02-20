@@ -90,9 +90,9 @@ const AppRoutes = () => {
   }
 
   // Comment out this to prevent blocking access to the maintenance page for admins
-  if (isMaintenance && roleNumber < 4) {
-    return <Maintenance />;
-  }
+  // if (isMaintenance && roleNumber < 4) {
+  //   return <Maintenance />;
+  // }
 
   return (
     <Routes>
